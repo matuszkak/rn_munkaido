@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, Switch, TouchableOpacity, Image } from 'react-native';
-import { loginStatus, signOutUser } from '../auth';
+import { loginStatus } from '../auth';
 import { getUserDataByEmail, saveHistoryOnFirebase } from '../database';
-import { storeUserData, removeUserData } from '../localStorage';
+import { storeUserData } from '../localStorage';
+
 export default function StatusPage(props) {
   // const [currentStatus, setCurrentStatus] = useState(false);
 
@@ -15,12 +16,6 @@ export default function StatusPage(props) {
     saveHistoryOnFirebase(props.userData.email, newState);
     generateImage();
     // setCurrentStatus(previousState => !previousState);
-  };
-
-  const handleLogout = async () => {
-    await signOutUser();
-    await removeUserData();
-    props.setUserData(null);
   };
 
   const generateImage = async () => {
@@ -44,8 +39,8 @@ export default function StatusPage(props) {
   return (
     <View style={styles.container}>
       <View style={styles.logoutSection}>
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutButtonText}>Kijelentkezés</Text>
+        <TouchableOpacity style={styles.logoutButton} onPress={() => props.navigation.navigate('Beállítások')}>
+          <Text style={styles.logoutButtonText}>Beállítások</Text>
         </TouchableOpacity>
       </View>
       <Text style={styles.appTitle}>Szia {props.userData.name}!</Text>
