@@ -10,16 +10,20 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
 } from 'react-native';
+
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { signIn, signUp } from '../auth';
 import { createUserOnFirebase, getUserDataByEmail } from '../database';
 import { storeUserData } from '../localStorage';
+import { resetPassword } from '../auth';
+
 const LoginPage = props => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [userName, setUserName] = useState('');
   const [isSignUpActive, setIsSignUpActive] = useState(false);
+
   const login = async () => {
     // log in to firebase
     console.log('login process started...');
@@ -31,18 +35,16 @@ const LoginPage = props => {
     storeUserData(userDataFromFirebase);
     props.setUserData(userDataFromFirebase);
   };
+
   const register = async () => {
     if (password !== passwordConfirm) {
       window.alert('Jelszók nem egyeznek!');
-
     } else {
-
       await signUp(email, password);
       const initialUserData = {
         name: userName,
         email,
         currentState: 'out',
-
       };
       createUserOnFirebase(initialUserData);
       storeUserData(initialUserData);
@@ -50,6 +52,33 @@ const LoginPage = props => {
       console.log(`${userName} is stored during register process`);
     }
   };
+
+
+
+  const checkEmailAndResetPwd = async () => {
+
+    console.log(email);
+
+    // function to check if email is valid
+    function validEmail(email) {
+      if (email.match(/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)) {
+        return true;
+      } else {
+        alert('Emailcím nem megfelelő formátumú!');
+        return false;
+      }
+    };
+
+    // check if email field populated
+    if (email == "") {
+      window.alert('Emailcím nem lehet üres!');
+    } else {
+      if (validEmail(email)) {
+        resetPassword(email)
+      }
+    }
+  };
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={styles.container}>
@@ -100,6 +129,19 @@ const LoginPage = props => {
                 onChangeText={setPasswordConfirm}
               />
             )}
+
+            {!isSignUpActive && (<TouchableOpacity
+              style={styles.forgotPwdRight}
+
+              onPress={() => {
+                checkEmailAndResetPwd();
+              }}>
+
+              <Text style={styles.forgotPwdText}>
+                Elfelejtett jelszó
+              </Text>
+            </TouchableOpacity>)}
+
             {isSignUpActive ? (
               <Button title="Regisztráció" onPress={register} />
             ) : (
@@ -107,10 +149,11 @@ const LoginPage = props => {
             )}
           </View>
         </KeyboardAwareScrollView>
-      </View>
-    </TouchableWithoutFeedback>
+      </View >
+    </TouchableWithoutFeedback >
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     paddingTop: 40,
@@ -170,5 +213,19 @@ const styles = StyleSheet.create({
   activeText: {
     color: '#ffffff',
   },
+  forgotPwdRight: {
+    paddingVertical: 2,
+    paddingBottom: 10,
+    paddingRight: 20,
+
+  },
+  forgotPwdText: {
+    textAlign: 'right',
+    fontSize: 12,
+    fontStyle: 'italic',
+    color: 'black',
+  },
 });
+
+
 export default LoginPage;
