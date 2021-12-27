@@ -32,17 +32,23 @@ const LoginPage = props => {
     props.setUserData(userDataFromFirebase);
   };
   const register = async () => {
-    await signUp(email, password);
-    const initialUserData = {
-      name: userName,
-      email,
-      currentState: 'out',
+    if (password !== passwordConfirm) {
+      window.alert('Jelszók nem egyeznek!');
 
-    };
-    createUserOnFirebase(initialUserData);
-    storeUserData(initialUserData);
-    props.setUserData(initialUserData);
-    console.log(`${userName} is stored during register process`);
+    } else {
+
+      await signUp(email, password);
+      const initialUserData = {
+        name: userName,
+        email,
+        currentState: 'out',
+
+      };
+      createUserOnFirebase(initialUserData);
+      storeUserData(initialUserData);
+      props.setUserData(initialUserData);
+      console.log(`${userName} is stored during register process`);
+    }
   };
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
