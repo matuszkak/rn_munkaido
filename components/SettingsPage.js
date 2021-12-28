@@ -17,7 +17,6 @@ export default function SettingsPage(props) {
         style={[styles.button, styles.shadow]} onPress={handleLogout}>
         <Text style={styles.buttonText}>Kijelentkezés</Text>
       </TouchableOpacity>
-
     </View>
   );
 }

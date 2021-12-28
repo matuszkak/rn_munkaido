@@ -1,12 +1,33 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, FlatList } from 'react-native';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, YellowBox, Alert } from 'react-native';
+import { SvgXml } from 'react-native-svg';
+import trashIcon from '../assets/Trash_font_awesome.js';
+import { deleteHistoryById, getHistory } from '../database';
 
-import { getHistory } from '../database';
 
 export default function HistoryPage(props) {
   const [history, setHistory] = useState([]);
 
+  // Process history item deletion request
+  const twoButtonAlert = () =>
+    Alert.alert('Biztos töröljem?', 'Ez esetben nyomj OK-t!', [
+      {
+        text: 'Cancel',
+        onPress: () => console.log('Cancel Pressed'),
+      },
+      {
+        text: 'OK', onPress: () => {
+          console.log(props.userData.email, history[0].id),
+            deleteHistoryById(props.userData.email, history[0].id),
+            setHistory(history.previousState),
+            props.toggleUserState()
+          props.navigation.navigate('Munkaidő Nyilvántartó')
+        }
+      },
+    ]);
+
   const renderItem = ({ item, index }) => (
+
     <View
       style={[
         styles.historyItemContainer,
@@ -14,16 +35,28 @@ export default function HistoryPage(props) {
         item.state === 'in' ? styles.containerIn : styles.containerOut,
       ]}>
       <View style={styles.historyTextContainer}>
-        <Text style={styles.currentStateText}>{item.date.toDate().toLocaleString('hu-HU')}</Text>
-        <Text
-          style={[
-            styles.currentStateText,
-            item.state === 'in' ? styles.currentStateTextIn : styles.currentStateTextOut,
-          ]}>
-          {item.state === 'in' ? 'bejött' : 'távozott'}
-        </Text>
+
+        <View>
+          < Text style={styles.currentStateText}>{item.date.toDate().toLocaleString('hu-HU')}</Text>
+          <Text
+            style={[
+              styles.currentStateText,
+              item.state === 'in' ? styles.currentStateTextIn : styles.currentStateTextOut,
+            ]}>
+            {item.state === 'in' ? 'bejött' : 'távozott'}
+          </Text>
+        </View>
+
+        {/* Delete button */}
+        <View style={styles.kuka}>
+          {index == 0 && (<TouchableOpacity >
+            <SvgXml width="30" height="30" xml={trashIcon} onPress={twoButtonAlert} />
+          </TouchableOpacity>)}
+        </View>
+
       </View>
-    </View>
+
+    </View >
   );
 
   useEffect(() => {
@@ -33,6 +66,7 @@ export default function HistoryPage(props) {
       setHistory(historyFromFirebase);
     })();
   }, []);
+
   return (
     <View style={styles.container}>
       <FlatList data={history} renderItem={renderItem} keyExtractor={item => item.id} />
@@ -56,7 +90,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  historyTextContainer: {},
+  historyTextContainer: {
+    flexDirection: 'row',
+
+  },
   currentStateText: {
     fontSize: 17,
     color: 'white',
@@ -72,5 +109,9 @@ const styles = StyleSheet.create({
     shadowOffset: { width: -2, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
+  },
+  kuka: {
+    marginLeft: 150,
+    marginTop: 5,
   },
 });
